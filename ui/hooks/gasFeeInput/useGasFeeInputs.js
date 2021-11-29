@@ -5,9 +5,9 @@ import {
   CUSTOM_GAS_ESTIMATE,
   GAS_RECOMMENDATIONS,
   EDIT_GAS_MODES,
+  PRIORITY_LEVELS,
 } from '../../../shared/constants/gas';
 import { GAS_FORM_ERRORS } from '../../helpers/constants/gas';
-import { areDappSuggestedAndTxParamGasFeesTheSame } from '../../helpers/utils/confirm-tx.util';
 import {
   checkNetworkAndAccountSupports1559,
   getAdvancedInlineGasShown,
@@ -77,6 +77,10 @@ export function useGasFeeInputs(
   minimumGasLimit = '0x5208',
   editGasMode = EDIT_GAS_MODES.MODIFY_IN_PLACE,
 ) {
+  // eslint-disable-next-line prefer-destructuring
+  const EIP_1559_V2_ENABLED =
+    process.env.EIP_1559_V2 === true || process.env.EIP_1559_V2 === 'true';
+
   const supportsEIP1559 =
     useSelector(checkNetworkAndAccountSupports1559) &&
     !isLegacyTransaction(transaction?.txParams);
