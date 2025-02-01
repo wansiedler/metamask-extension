@@ -2,8 +2,9 @@ import React from 'react';
 import OnboardingWelcome from './welcome';
 
 export default {
-  title: 'Onboarding',
-  id: __filename,
+  title: 'Pages/OnboardingFlow/Welcome',
 };
 
-export const OnboardingComponent = () => <OnboardingWelcome />;
+export const DefaultStory = () => <OnboardingWelcome />;
+
+DefaultStory.storyName = 'Default';

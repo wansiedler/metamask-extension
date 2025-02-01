@@ -1,37 +1,66 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import Box from '../../../components/ui/box';
-import Button from '../../../components/ui/button';
-import Typography from '../../../components/ui/typography';
+
 import {
-  TEXT_ALIGN,
-  TYPOGRAPHY,
-  JUSTIFY_CONTENT,
-  FONT_WEIGHT,
+  TextAlign,
+  TextVariant,
+  JustifyContent,
+  BackgroundColor,
+  BorderRadius,
+  AlignItems,
+  FlexDirection,
+  Display,
+  BlockSize,
 } from '../../../helpers/constants/design-system';
 import {
   ThreeStepProgressBar,
   threeStepStages,
 } from '../../../components/app/step-progress-bar';
 import { useI18nContext } from '../../../hooks/useI18nContext';
+import { MetaMetricsContext } from '../../../contexts/metametrics';
 import { ONBOARDING_REVIEW_SRP_ROUTE } from '../../../helpers/constants/routes';
-import { getCurrentLocale } from '../../../ducks/metamask/metamask';
+import { getCurrentLocale } from '../../../ducks/locale/locale';
+import {
+  MetaMetricsEventCategory,
+  MetaMetricsEventName,
+} from '../../../../shared/constants/metametrics';
+import {
+  Box,
+  Button,
+  BUTTON_VARIANT,
+  BUTTON_SIZES,
+  Text,
+} from '../../../components/component-library';
 import SkipSRPBackup from './skip-srp-backup-popover';
 
 export default function SecureYourWallet() {
   const history = useHistory();
   const t = useI18nContext();
+  const { search } = useLocation();
   const currentLocale = useSelector(getCurrentLocale);
-  const [showSkipSRPBackupPopover, setShowSkipSRPBackupPopover] = useState(
-    false,
-  );
+  const [showSkipSRPBackupPopover, setShowSkipSRPBackupPopover] =
+    useState(false);
+  const searchParams = new URLSearchParams(search);
+  const isFromReminderParam = searchParams.get('isFromReminder')
+    ? '/?isFromReminder=true'
+    : '';
+
+  const trackEvent = useContext(MetaMetricsContext);
 
   const handleClickRecommended = () => {
-    history.push(ONBOARDING_REVIEW_SRP_ROUTE);
+    trackEvent({
+      category: MetaMetricsEventCategory.Onboarding,
+      event: MetaMetricsEventName.OnboardingWalletSecurityStarted,
+    });
+    history.push(`${ONBOARDING_REVIEW_SRP_ROUTE}${isFromReminderParam}`);
   };
 
   const handleClickNotRecommended = () => {
+    trackEvent({
+      category: MetaMetricsEventCategory.Onboarding,
+      event: MetaMetricsEventName.OnboardingWalletSecuritySkipInitiated,
+    });
     setShowSkipSRPBackupPopover(true);
   };
 
@@ -46,38 +75,59 @@ export default function SecureYourWallet() {
     ru: 'Russian',
     tl: 'Tagalog',
     vi: 'Vietnamese',
+    de: 'German',
+    el: 'Greek',
+    fr: 'French',
+    tr: 'Turkish',
+    zh: 'Chinese - China',
   };
 
   const defaultLang = subtitles[currentLocale] ? currentLocale : 'en';
   return (
-    <div className="secure-your-wallet">
+    <Box
+      display={Display.Flex}
+      justifyContent={JustifyContent.center}
+      alignItems={AlignItems.center}
+      flexDirection={FlexDirection.Column}
+      className="secure-your-wallet"
+      data-testid="secure-your-wallet"
+    >
       {showSkipSRPBackupPopover && (
         <SkipSRPBackup handleClose={() => setShowSkipSRPBackupPopover(false)} />
       )}
-      <ThreeStepProgressBar stage={threeStepStages.RECOVERY_PHRASE_VIDEO} />
-      <Box
-        justifyContent={JUSTIFY_CONTENT.CENTER}
-        textAlign={TEXT_ALIGN.CENTER}
+      <ThreeStepProgressBar
+        stage={threeStepStages.RECOVERY_PHRASE_VIDEO}
         marginBottom={4}
+      />
+      <Text
+        variant={TextVariant.headingLg}
+        as="h2"
+        marginBottom={4}
+        textAlign={TextAlign.Center}
       >
-        <Typography variant={TYPOGRAPHY.H2} fontWeight={FONT_WEIGHT.BOLD}>
-          {t('seedPhraseIntroTitle')}
-        </Typography>
-      </Box>
-      <Box
-        justifyContent={JUSTIFY_CONTENT.CENTER}
-        textAlign={TEXT_ALIGN.CENTER}
+        {t('seedPhraseIntroTitle')}
+      </Text>
+      <Text
+        variant={TextVariant.bodyLgMedium}
         marginBottom={6}
+        className="secure-your-wallet__details"
       >
-        <Typography
-          variant={TYPOGRAPHY.H4}
-          className="secure-your-wallet__details"
+        {t('seedPhraseIntroTitleCopy')}
+      </Text>
+      {process.env.IN_TEST ? null : (
+        <Box
+          as="video"
+          borderRadius={BorderRadius.LG}
+          marginBottom={8}
+          className="secure-your-wallet__video"
+          onPlay={() => {
+            trackEvent({
+              category: MetaMetricsEventCategory.Onboarding,
+              event: MetaMetricsEventName.OnboardingWalletVideoPlay,
+            });
+          }}
+          controls
         >
-          {t('seedPhraseIntroTitleCopy')}
-        </Typography>
-      </Box>
-      <Box>
-        <video controls style={{ borderRadius: '10px' }}>
           <source
             type="video/webm"
             src="./images/videos/recovery-onboarding/video.webm"
@@ -94,84 +144,63 @@ export default function SecureYourWallet() {
               />
             );
           })}
-        </video>
-      </Box>
+        </Box>
+      )}
       <Box
-        margin={8}
-        width="10/12"
-        justifyContent={JUSTIFY_CONTENT.SPACE_BETWEEN}
         className="secure-your-wallet__actions"
+        marginBottom={8}
+        width={BlockSize.Full}
+        display={Display.Flex}
+        flexDirection={[FlexDirection.Column, FlexDirection.Row]}
+        justifyContent={JustifyContent.spaceBetween}
+        gap={4}
       >
         <Button
           data-testid="secure-wallet-later"
-          type="secondary"
-          rounded
-          large
+          variant={BUTTON_VARIANT.SECONDARY}
+          size={BUTTON_SIZES.LG}
+          block
           onClick={handleClickNotRecommended}
         >
           {t('seedPhraseIntroNotRecommendedButtonCopy')}
         </Button>
         <Button
           data-testid="secure-wallet-recommended"
-          type="primary"
-          rounded
-          large
+          size={BUTTON_SIZES.LG}
+          block
           onClick={handleClickRecommended}
         >
           {t('seedPhraseIntroRecommendedButtonCopy')}
         </Button>
       </Box>
-      <Box marginBottom={4} textAlign={TEXT_ALIGN.CENTER}>
-        <Typography
-          tag="span"
-          variant={TYPOGRAPHY.H4}
-          fontWeight={FONT_WEIGHT.BOLD}
-          boxProps={{ display: 'block' }}
-        >
+      <Box className="secure-your-wallet__desc">
+        <Text as="h3" variant={TextVariant.headingSm}>
           {t('seedPhraseIntroSidebarTitleOne')}
-        </Typography>
-        <Typography tag="span" variant={TYPOGRAPHY.H4}>
-          {t('seedPhraseIntroSidebarCopyOne')}
-        </Typography>
-      </Box>
-      <Box marginBottom={4} textAlign={TEXT_ALIGN.CENTER}>
-        <Typography
-          tag="span"
-          variant={TYPOGRAPHY.H4}
-          fontWeight={FONT_WEIGHT.BOLD}
-          boxProps={{ display: 'block' }}
-        >
+        </Text>
+        <Text marginBottom={4}>{t('seedPhraseIntroSidebarCopyOne')}</Text>
+        <Text as="h3" variant={TextVariant.headingSm}>
           {t('seedPhraseIntroSidebarTitleTwo')}
-        </Typography>
-        <ul className="secure-your-wallet__list">
-          <li>{t('seedPhraseIntroSidebarBulletOne')}</li>
-          <li>{t('seedPhraseIntroSidebarBulletTwo')}</li>
-          <li>{t('seedPhraseIntroSidebarBulletThree')}</li>
-          <li>{t('seedPhraseIntroSidebarBulletFour')}</li>
-        </ul>
-      </Box>
-      <Box marginBottom={6} textAlign={TEXT_ALIGN.CENTER}>
-        <Typography
-          tag="span"
-          variant={TYPOGRAPHY.H4}
-          fontWeight={FONT_WEIGHT.BOLD}
-          boxProps={{ display: 'block' }}
-        >
+        </Text>
+        <Box as="ul" className="secure-your-wallet__list" marginBottom={4}>
+          <Text as="li">{t('seedPhraseIntroSidebarBulletOne')}</Text>
+          <Text as="li">{t('seedPhraseIntroSidebarBulletTwo')}</Text>
+        </Box>
+        <Text as="h3" variant={TextVariant.headingSm}>
           {t('seedPhraseIntroSidebarTitleThree')}
-        </Typography>
-        <Typography tag="span" variant={TYPOGRAPHY.H4}>
+        </Text>
+        <Text as="p" marginBottom={4}>
           {t('seedPhraseIntroSidebarCopyTwo')}
-        </Typography>
-      </Box>
-      <Box
-        className="secure-your-wallet__highlighted"
-        marginBottom={2}
-        textAlign={TEXT_ALIGN.CENTER}
-      >
-        <Typography tag="span" variant={TYPOGRAPHY.H4}>
+        </Text>
+        <Text
+          as="h3"
+          variant={TextVariant.headingSm}
+          backgroundColor={BackgroundColor.primaryMuted}
+          padding={4}
+          borderRadius={BorderRadius.LG}
+        >
           {t('seedPhraseIntroSidebarCopyThree')}
-        </Typography>
+        </Text>
       </Box>
-    </div>
+    </Box>
   );
 }

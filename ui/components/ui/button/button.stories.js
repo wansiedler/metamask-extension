@@ -1,13 +1,15 @@
 import React from 'react';
 
-import BuyIcon from '../icon/overview-buy-icon.component';
+import { SEVERITIES } from '../../../helpers/constants/design-system';
+import { BannerAlert } from '../../component-library';
+
+import IconTokenSearch from '../icon/icon-token-search';
 
 import README from './README.mdx';
 import Button from '.';
 
 export default {
-  title: 'Button',
-  id: __filename,
+  title: 'Components/UI/Button',
   component: Button,
   parameters: {
     docs: {
@@ -16,8 +18,6 @@ export default {
   },
   argTypes: {
     children: { control: 'text' },
-    disabled: { control: 'boolean' },
-    onClick: { action: 'clicked' },
     type: {
       control: {
         type: 'select',
@@ -30,25 +30,47 @@ export default {
         'danger',
         'danger-primary',
         'link',
+        'inline',
       ],
     },
-    submit: { control: 'boolean' },
     large: { control: 'boolean' },
-    className: { control: 'text' },
     icon: {
       control: {
         type: 'select',
       },
-      options: ['BuyIcon'],
+      options: ['IconTokenSearch'],
       mapping: {
-        BuyIcon: <BuyIcon />,
+        IconTokenSearch: <IconTokenSearch />,
       },
     },
+    submit: { control: 'boolean' },
+    disabled: { control: 'boolean' },
+    className: { control: 'text' },
+    onClick: { action: 'clicked' },
+  },
+  args: {
+    disabled: false,
+    large: false,
+    submit: false,
+    className: '',
+    rounded: true,
   },
 };
 
 export const DefaultStory = (args) => (
-  <Button {...args}>{args.children}</Button>
+  <>
+    <BannerAlert
+      marginBottom={4}
+      severity={SEVERITIES.WARNING}
+      title="Deprecated"
+      description="This version of Button has been deprecated in favor of the component-library version. Contribute to replacing old Button with new Button by submitting a PR to metamask-extension."
+      actionButtonLabel="See details"
+      actionButtonProps={{
+        href: 'https://github.com/MetaMask/metamask-extension/issues/18896',
+      }}
+    />
+    <Button {...args}>{args.children}</Button>
+  </>
 );
 
 DefaultStory.storyName = 'Default';
@@ -57,40 +79,87 @@ DefaultStory.args = {
   children: 'Default',
 };
 
-export const Types = (args) => (
+export const Type = (args) => (
   <>
     <Button {...args} type="default">
       {args.children || 'Default'}
     </Button>
+    <br />
     <Button {...args} type="primary">
       {args.children || 'Primary'}
     </Button>
+    <br />
     <Button {...args} type="secondary">
       {args.children || 'Secondary'}
     </Button>
+    <br />
     <Button {...args} type="warning">
       {args.children || 'Warning'}
     </Button>
+    <br />
     <Button {...args} type="danger">
       {args.children || 'Danger'}
     </Button>
+    <br />
     <Button {...args} type="danger-primary">
       {args.children || 'Danger primary'}
     </Button>
+    <br />
+    <Button {...args} type="raised">
+      {args.children || 'Raised'}
+    </Button>
+    <br />
     <Button {...args} type="link">
       {args.children || 'Link'}
+    </Button>
+    <br />
+    <Button {...args} type="inline">
+      {args.children || 'Inline'}
     </Button>
   </>
 );
 
-export const LinkType = (args) => <Button {...args} type="link" />;
+Type.args = {
+  children: '',
+};
 
-LinkType.args = {
+export const TypeLink = (args) => (
+  <Button type={args.type}>{args.children}</Button>
+);
+
+TypeLink.args = {
+  href: 'https://metamask.io/',
+  type: 'link',
   children: 'Click me',
 };
 
-export const WithIcon = (args) => (
-  <Button {...args} type="primary" icon={<BuyIcon />}>
-    {args.children || 'Buy'}
+export const TypeInline = (args) => (
+  <div>
+    this is a inline button
+    <Button type={args.type}>{args.children}</Button>
+  </div>
+);
+
+TypeInline.args = {
+  type: 'inline',
+  children: 'Click me',
+};
+
+export const Icon = (args) => <Button {...args}>{args.children}</Button>;
+Icon.args = {
+  type: 'primary',
+  icon: <IconTokenSearch />,
+  children: 'Search',
+};
+
+export const Submit = (args) => (
+  <Button type={args.type} submit={args.submit}>
+    {args.children}
   </Button>
 );
+
+Submit.args = {
+  type: 'primary',
+  submit: true,
+  children: 'Submit',
+};

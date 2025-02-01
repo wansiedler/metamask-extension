@@ -38,7 +38,9 @@ export default function ListItem({
         {React.isValidElement(title) ? (
           title
         ) : (
-          <h2 className="list-item__title">{title}</h2>
+          <h2 className="list-item__title" data-testid="list-item-title">
+            {title}
+          </h2>
         )}
         {titleIcon && (
           <div className="list-item__heading-wrap">{titleIcon}</div>
@@ -52,21 +54,26 @@ export default function ListItem({
         <div className="list-item__mid-content">{midContent}</div>
       ) : null}
       {rightContent ? (
-        <div className="list-item__right-content">{rightContent}</div>
+        <div
+          className="list-item__right-content"
+          data-testid="list-item-right-content"
+        >
+          {rightContent}
+        </div>
       ) : null}
     </div>
   );
 }
 
 ListItem.propTypes = {
-  'title': PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
-  'titleIcon': PropTypes.node,
-  'subtitle': PropTypes.node,
-  'children': PropTypes.node,
-  'icon': PropTypes.node,
-  'rightContent': PropTypes.node,
-  'midContent': PropTypes.node,
-  'className': PropTypes.string,
-  'onClick': PropTypes.func,
+  title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
+  titleIcon: PropTypes.node,
+  subtitle: PropTypes.node,
+  children: PropTypes.node,
+  icon: PropTypes.node,
+  rightContent: PropTypes.node,
+  midContent: PropTypes.node,
+  className: PropTypes.string,
+  onClick: PropTypes.func,
   'data-testid': PropTypes.string,
 };
